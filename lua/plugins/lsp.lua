@@ -12,6 +12,12 @@ return {
         "tailwindcss-language-server",
         "typescript-language-server",
         "css-lsp",
+        "python-lsp-server", -- 🔥 agregado
+        "black", -- 🔥 formateador
+        "isort", -- 🔥 ordena imports
+        "flake8",
+        "omnisharp",
+        "csharpier",
       })
     end,
   },
@@ -64,6 +70,33 @@ return {
           settings = {
             yaml = {
               keyOrdering = false,
+            },
+          },
+        },
+        pylsp = {
+          settings = {
+            pylsp = {
+              plugins = {
+                pyflakes = { enabled = true },
+                pycodestyle = { enabled = false },
+                yapf = { enabled = false },
+                pylint = { enabled = false },
+                pylsp_mypy = { enabled = true },
+                black = { enabled = true },
+                isort = { enabled = true },
+              },
+            },
+          },
+        },
+        omnisharp = {
+          cmd = { "omnisharp" },
+          enable_roslyn_analyzers = true,
+          enable_import_completion = true,
+          organize_imports_on_format = true,
+          settings = {
+            FormattingOptions = {
+              EnableEditorConfigSupport = true,
+              OrganizeImports = true,
             },
           },
         },

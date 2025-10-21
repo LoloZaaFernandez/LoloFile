@@ -20,3 +20,9 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.conceallevel = 0
   end,
 })
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = { "*.py", "*.cs" },
+  callback = function()
+    vim.lsp.buf.format({ async = false })
+  end,
+})
