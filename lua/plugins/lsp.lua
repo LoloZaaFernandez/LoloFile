@@ -21,6 +21,9 @@ return {
       })
     end,
   },
+  {
+    "Hoffs/omnisharp-extended-lsp.nvim",
+  },
 
   -- lsp servers
   {
@@ -37,16 +40,16 @@ return {
         },
         tsserver = {
           root_dir = function(...)
-            return require("lspconfig.util").root_pattern(".git")(...)
+            return require("lspconfig.util").root_pattern("angular.json", "package.json", ".git")(...)
           end,
           single_file_support = false,
           settings = {
             typescript = {
               inlayHints = {
-                includeInlayParameterNameHints = "literal",
+                includeInlayParameterNameHints = "all",
                 includeInlayParameterNameHintsWhenArgumentMatchesName = false,
                 includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = false,
+                includeInlayVariableTypeHints = true,
                 includeInlayPropertyDeclarationTypeHints = true,
                 includeInlayFunctionLikeReturnTypeHints = true,
                 includeInlayEnumMemberValueHints = true,
@@ -89,17 +92,17 @@ return {
           },
         },
         omnisharp = {
-          cmd = { "omnisharp" },
-          enable_roslyn_analyzers = true,
+          cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
+          enable_ms_build_load_projects_on_demand = false,
+          enable_editorconfig_support = true,
           enable_import_completion = true,
           organize_imports_on_format = true,
-          settings = {
-            FormattingOptions = {
-              EnableEditorConfigSupport = true,
-              OrganizeImports = true,
-            },
-          },
+          enable_roslyn_analyzers = true,
+          sdk_include_prereleases = true,
+          analyze_open_documents_only = false,
+          handlers = {},
         },
+
         lua_ls = {
           -- enabled = false,
           single_file_support = true,
@@ -166,7 +169,21 @@ return {
           },
         },
       },
-      setup = {},
+      setup = {
+        omnisharp = function(_, _)
+          local ok, omnisharp_extended = pcall(require, "omnisharp_extended")
+          if ok then
+            local lspconfig = require("lspconfig")
+            lspconfig.omnisharp.setup({
+              handlers = {
+                ["textDocument/definition"] = omnisharp_extended.handler,
+              },
+            })
+          else
+            vim.notify("omnisharp_extended not loaded", vim.log.levels.WARN)
+          end
+        end,
+      },
     },
   },
   {
