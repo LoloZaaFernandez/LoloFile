@@ -8,4 +8,7 @@ _G.dd = function(...)
 end
 vim.print = _G.dd
 
+-- Cargar optimizaciones de rendimiento
+require("config.performance")
+
 require("config.lazy")

@@ -4,6 +4,7 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    event = { "BufReadPost", "BufNewFile" }, -- Cargar solo cuando abres archivos (MEJORA DE RENDIMIENTO)
     opts = {
       ensure_installed = {
         "astro",
@@ -25,19 +26,23 @@ return {
         "c_sharp",
       },
 
+      -- Instalar parsers de forma incremental (MEJORA DE RENDIMIENTO)
+      auto_install = false, -- No instalar automáticamente al abrir archivos desconocidos
+      sync_install = false, -- Instalar de forma asíncrona
+
       -- matchup = {
       -- 	enable = true,
       -- },
 
       -- https://github.com/nvim-treesitter/playground#query-linter
       query_linter = {
-        enable = true,
+        enable = false, -- Deshabilitar query linter (MEJORA DE RENDIMIENTO)
         use_virtual_text = true,
         lint_events = { "BufWrite", "CursorHold" },
       },
 
       playground = {
-        enable = true,
+        enable = false, -- Deshabilitar playground por defecto (MEJORA DE RENDIMIENTO)
         disable = {},
         updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
         persist_queries = true, -- Whether the query persists across vim sessions
