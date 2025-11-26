@@ -1,68 +1,86 @@
 return {
-  { "nvim-treesitter/playground", cmd = "TSPlaygroundToggle" },
-
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" }, -- Cargar solo cuando abres archivos (MEJORA DE RENDIMIENTO)
+    event = { "LazyFile", "VeryLazy" },
+    lazy = vim.fn.argc(-1) == 0, -- cargar si no hay archivos
+    init = function(plugin)
+      -- Cargar treesitter antes de VeryLazy para mejor highlighting
+      require("lazy.core.loader").add_to_rtp(plugin)
+    end,
+    cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
+    keys = {
+      { "<c-space>", desc = "Increment Selection" },
+      { "<bs>", desc = "Decrement Selection", mode = "x" },
+    },
     opts = {
       ensure_installed = {
-        "astro",
-        "cmake",
+        "bash",
+        "c",
+        "c_sharp",
         "cpp",
         "css",
-        "fish",
-        "gitignore",
+        "diff",
         "go",
         "graphql",
+        "html",
         "http",
         "java",
-        "php",
+        "javascript",
+        "jsdoc",
+        "json",
+        "jsonc",
+        "lua",
+        "luadoc",
+        "luap",
+        "markdown",
+        "markdown_inline",
+        "python",
+        "query",
+        "regex",
         "rust",
         "scss",
         "sql",
-        "svelte",
-        "python",
-        "c_sharp",
+        "toml",
+        "tsx",
+        "typescript",
+        "vim",
+        "vimdoc",
+        "xml",
+        "yaml",
       },
-
-      -- Instalar parsers de forma incremental (MEJORA DE RENDIMIENTO)
-      auto_install = false, -- No instalar automáticamente al abrir archivos desconocidos
-      sync_install = false, -- Instalar de forma asíncrona
-
-      -- matchup = {
-      -- 	enable = true,
-      -- },
-
-      -- https://github.com/nvim-treesitter/playground#query-linter
-      query_linter = {
-        enable = false, -- Deshabilitar query linter (MEJORA DE RENDIMIENTO)
-        use_virtual_text = true,
-        lint_events = { "BufWrite", "CursorHold" },
+      -- Instalar parsers de forma incremental
+      auto_install = true,
+      sync_install = false,
+      highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
       },
-
-      playground = {
-        enable = false, -- Deshabilitar playground por defecto (MEJORA DE RENDIMIENTO)
-        disable = {},
-        updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-        persist_queries = true, -- Whether the query persists across vim sessions
-        keybindings = {
-          toggle_query_editor = "o",
-          toggle_hl_groups = "i",
-          toggle_injected_languages = "t",
-          toggle_anonymous_nodes = "a",
-          toggle_language_display = "I",
-          focus_language = "f",
-          unfocus_language = "F",
-          update = "R",
-          goto_node = "<cr>",
-          show_help = "?",
+      indent = {
+        enable = true,
+        disable = { "python", "yaml" },
+      },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<C-space>",
+          node_incremental = "<C-space>",
+          scope_incremental = false,
+          node_decremental = "<bs>",
+        },
+      },
+      textobjects = {
+        move = {
+          enable = true,
+          goto_next_start = { ["]f"] = "@function.outer", ["]c"] = "@class.outer", ["]a"] = "@parameter.inner" },
+          goto_next_end = { ["]F"] = "@function.outer", ["]C"] = "@class.outer", ["]A"] = "@parameter.inner" },
+          goto_previous_start = { ["[f"] = "@function.outer", ["[c"] = "@class.outer", ["[a"] = "@parameter.inner" },
+          goto_previous_end = { ["[F"] = "@function.outer", ["[C"] = "@class.outer", ["[A"] = "@parameter.inner" },
         },
       },
     },
     config = function(_, opts)
-      local TS = require("nvim-treesitter")
-      TS.setup(opts)
+      require("nvim-treesitter").setup(opts)
 
       -- MDX
       vim.filetype.add({
@@ -71,6 +89,25 @@ return {
         },
       })
       vim.treesitter.language.register("markdown", "mdx")
+    end,
+  },
+  -- Textobjects para treesitter
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    event = "VeryLazy",
+    enabled = true,
+    config = function()
+      -- Al cargar nvim-treesitter-textobjects
+      if require("lazy.core.config").spec.plugins["nvim-treesitter"] then
+        local opts = require("lazy.core.plugin").values(
+          require("lazy.core.config").spec.plugins["nvim-treesitter"],
+          "opts",
+          false
+        )
+        if type(opts.textobjects) == "table" then
+          require("nvim-treesitter").setup({ textobjects = opts.textobjects })
+        end
+      end
     end,
   },
 }

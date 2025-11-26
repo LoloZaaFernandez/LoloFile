@@ -6,6 +6,7 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+
 -- Turn off paste mode when leaving insert
 vim.api.nvim_create_autocmd("InsertLeave", {
   pattern = "*",
@@ -17,55 +18,77 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "json", "jsonc", "markdown" },
   callback = function()
-    vim.opt.conceallevel = 0
+    vim.opt_local.conceallevel = 0
   end,
 })
--- FORMATEO INTELIGENTE: Solo formatea líneas modificadas en proyectos grandes
--- Para proyectos pequeños o cuando quieras formatear todo, usa: <leader>cF
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = { "*.py", "*.cs", "*.ts", "*.tsx", "*.js", "*.jsx" },
+
+-- Cerrar algunos filetypes con 'q'
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {
+    "PlenaryTestPopup",
+    "help",
+    "lspinfo",
+    "notify",
+    "qf",
+    "query",
+    "spectre_panel",
+    "startuptime",
+    "tsplayground",
+    "neotest-output",
+    "checkhealth",
+    "neotest-summary",
+    "neotest-output-panel",
+  },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+  end,
+})
+
+-- Resaltar cuando se copia texto
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.highlight.on_yank({ timeout = 200 })
+  end,
+})
+
+-- Redimensionar splits cuando se redimensiona la ventana
+vim.api.nvim_create_autocmd({ "VimResized" }, {
+  callback = function()
+    local current_tab = vim.fn.tabpagenr()
+    vim.cmd("tabdo wincmd =")
+    vim.cmd("tabnext " .. current_tab)
+  end,
+})
+
+-- Ir a la última posición conocida al abrir un buffer
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function(event)
+    local exclude = { "gitcommit" }
+    local buf = event.buf
+    if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
+      return
+    end
+    vim.b[buf].lazyvim_last_loc = true
+    local mark = vim.api.nvim_buf_get_mark(buf, '"')
+    local lcount = vim.api.nvim_buf_line_count(buf)
+    if mark[1] > 0 and mark[1] <= lcount then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
+})
+
+-- Habilitar inlay hints automáticamente para C# cuando LSP se adjunta
+vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
-    -- Intentar obtener cambios de git para formatear solo lo modificado
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
     local bufnr = args.buf
-    local filename = vim.api.nvim_buf_get_name(bufnr)
 
-    -- Verificar si el archivo está en un repo git
-    local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(vim.fn.fnamemodify(filename, ":h")) .. " rev-parse --show-toplevel 2>nul")[1]
-
-    if git_root and git_root ~= "" then
-      -- Obtener las líneas modificadas usando git diff
-      local diff_output = vim.fn.systemlist(
-        "git -C " .. vim.fn.shellescape(git_root) .. " diff -U0 --no-color --no-ext-diff " .. vim.fn.shellescape(filename) .. " 2>nul"
-      )
-
-      if vim.v.shell_error == 0 and #diff_output > 0 then
-        -- Parsear el output de git diff para obtener rangos modificados
-        local ranges = {}
-        for _, line in ipairs(diff_output) do
-          local start_line, line_count = line:match("^@@.*%+(%d+),?(%d*)")
-          if start_line then
-            start_line = tonumber(start_line)
-            line_count = tonumber(line_count) or 1
-            if line_count > 0 then
-              table.insert(ranges, { start = { start_line, 0 }, ["end"] = { start_line + line_count - 1, 0 } })
-            end
-          end
-        end
-
-        -- Formatear solo los rangos modificados
-        if #ranges > 0 then
-          require("conform").format({
-            bufnr = bufnr,
-            async = false,
-            lsp_fallback = true,
-            range = ranges[1], -- Formatear el primer rango (puedes iterar todos si quieres)
-          })
-          return
-        end
+    -- Si es C# (omnisharp), habilitar inlay hints inmediatamente
+    if client and client.name == "omnisharp" then
+      if client.server_capabilities.inlayHintProvider then
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
       end
     end
-
-    -- Fallback: Si no hay cambios de git o es un archivo nuevo, NO formatear automáticamente
-    -- El usuario puede formatear manualmente con <leader>cf (solo buffer) o <leader>cF (todo el proyecto)
   end,
 })

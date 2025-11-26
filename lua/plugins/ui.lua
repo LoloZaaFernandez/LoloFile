@@ -61,8 +61,23 @@ return {
   },
 
   {
-    "snacks.nvim",
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
     opts = {
+      bigfile = { enabled = true }, -- Detectar archivos grandes automáticamente
+      notifier = {
+        enabled = true,
+        timeout = 3000,
+      },
+      quickfile = { enabled = true },
+      statuscolumn = { enabled = false },
+      words = { enabled = true },
+      styles = {
+        notification = {
+          wo = { wrap = true },
+        },
+      },
       scroll = { enabled = false },
     },
     keys = {},
