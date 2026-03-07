@@ -2,10 +2,10 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    event = { "LazyFile", "VeryLazy" },
-    lazy = vim.fn.argc(-1) == 0, -- cargar si no hay archivos
+    event = { "BufReadPost", "BufNewFile" }, -- Cargar solo al abrir archivos
+    lazy = true, -- Siempre lazy load
     init = function(plugin)
-      -- Cargar treesitter antes de VeryLazy para mejor highlighting
+      -- Cargar treesitter de forma perezosa
       require("lazy.core.loader").add_to_rtp(plugin)
     end,
     cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
@@ -14,44 +14,17 @@ return {
       { "<bs>", desc = "Decrement Selection", mode = "x" },
     },
     opts = {
+      -- Solo instalar parsers esenciales, el resto bajo demanda
       ensure_installed = {
-        "bash",
-        "c",
-        "c_sharp",
-        "cpp",
-        "css",
-        "diff",
-        "go",
-        "graphql",
-        "html",
-        "http",
-        "java",
-        "javascript",
-        "jsdoc",
-        "json",
-        "jsonc",
-        "lua",
-        "luadoc",
-        "luap",
-        "markdown",
-        "markdown_inline",
-        "python",
-        "query",
-        "regex",
-        "rust",
-        "scss",
-        "sql",
-        "toml",
-        "tsx",
-        "typescript",
+        "c_sharp", -- Crítico para C#
+        "lua", -- Para configuración
         "vim",
         "vimdoc",
-        "xml",
-        "yaml",
+        "markdown",
       },
-      -- Instalar parsers de forma incremental
-      auto_install = true,
-      sync_install = false,
+      -- Instalar parsers de forma incremental y bajo demanda
+      auto_install = true, -- Auto-instalar cuando abras un archivo de ese tipo
+      sync_install = false, -- No bloquear Neovim mientras instala
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
