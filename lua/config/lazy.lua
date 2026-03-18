@@ -59,7 +59,9 @@ require("lazy").setup({
     cache = {
       enabled = true,
     },
+    reset_packpath = true, -- reset packpath to improve startup time
     rtp = {
+      reset = true, -- reset runtime path to $VIMRUNTIME and your config
       -- disable some rtp plugins
       disabled_plugins = {
         "gzip",
@@ -70,6 +72,10 @@ require("lazy").setup({
         "tohtml",
         "tutor",
         "zipPlugin",
+        "rplugin",
+        "spellfile",
+        "editorconfig",
+        "man",
       },
     },
   },
