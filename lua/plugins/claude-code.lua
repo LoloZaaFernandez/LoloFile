@@ -1,16 +1,13 @@
 -- Integración de Claude Code CLI con Neovim - Split Lateral Persistente
 return {
   {
-    "3rd/image.nvim",
-    optional = true,
-  },
-  {
     "nvim-lua/plenary.nvim",
     lazy = false,
     config = function()
       -- Verificar si Claude Code está instalado
       local function is_claude_installed()
-        local handle = io.popen("where claude 2>nul")
+        local cmd = vim.fn.has("win32") == 1 and "where claude 2>nul" or "which claude 2>/dev/null"
+        local handle = io.popen(cmd)
         if handle then
           local result = handle:read("*a")
           handle:close()

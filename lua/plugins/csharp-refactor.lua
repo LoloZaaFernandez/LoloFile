@@ -23,116 +23,110 @@ return {
   {
     "neovim/nvim-lspconfig",
     optional = true,
-    opts = function()
-      -- Keymaps para code actions y refactorings
-      local keys = {
-        {
-          "<leader>ca",
-          vim.lsp.buf.code_action,
-          desc = "Code Action",
-          mode = { "n", "v" },
-          has = "codeAction",
-        },
-        {
-          "<leader>cA",
-          function()
-            vim.lsp.buf.code_action({
-              context = {
-                only = { "source" },
-                diagnostics = {},
-              },
-            })
-          end,
-          desc = "Source Action",
-          has = "codeAction",
-        },
-        -- Refactorings específicos de C#
-        {
-          "<leader>re",
-          function()
-            vim.lsp.buf.code_action({
-              context = {
-                only = { "refactor.extract" },
-                diagnostics = {},
-              },
-            })
-          end,
-          desc = "Extract (Method/Variable)",
-          mode = { "n", "v" },
-        },
-        {
-          "<leader>ri",
-          function()
-            vim.lsp.buf.code_action({
-              context = {
-                only = { "refactor.inline" },
-                diagnostics = {},
-              },
-            })
-          end,
-          desc = "Inline Variable/Method",
-        },
-        {
-          "<leader>rr",
-          function()
-            vim.lsp.buf.code_action({
-              context = {
-                only = { "refactor.rewrite" },
-                diagnostics = {},
-              },
-            })
-          end,
-          desc = "Rewrite/Restructure Code",
-          mode = { "n", "v" },
-        },
-        -- Quick fixes rápidos
-        {
-          "<leader>qf",
-          function()
-            vim.lsp.buf.code_action({
-              apply = true, -- Aplicar automáticamente si solo hay una opción
-              context = {
-                only = { "quickfix" },
-                diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 }),
-              },
-            })
-          end,
-          desc = "Quick Fix",
-        },
-        -- Organizar imports/usings
-        {
-          "<leader>co",
-          function()
-            vim.lsp.buf.code_action({
-              apply = true,
-              context = {
-                only = { "source.organizeImports" },
-                diagnostics = {},
-              },
-            })
-          end,
-          desc = "Organize Imports",
-        },
-        -- Remove unused usings
-        {
-          "<leader>cu",
-          function()
-            vim.lsp.buf.code_action({
-              apply = true,
-              context = {
-                only = { "source.removeUnusedImports" },
-                diagnostics = {},
-              },
-            })
-          end,
-          desc = "Remove Unused Imports",
-        },
-      }
-
-      return {
-        keys = keys,
-      }
-    end,
+    keys = {
+      -- Code actions y refactorings
+      {
+        "<leader>ca",
+        vim.lsp.buf.code_action,
+        desc = "Code Action",
+        mode = { "n", "v" },
+        has = "codeAction",
+      },
+      {
+        "<leader>cA",
+        function()
+          vim.lsp.buf.code_action({
+            context = {
+              only = { "source" },
+              diagnostics = {},
+            },
+          })
+        end,
+        desc = "Source Action",
+        has = "codeAction",
+      },
+      -- Refactorings específicos de C#
+      {
+        "<leader>re",
+        function()
+          vim.lsp.buf.code_action({
+            context = {
+              only = { "refactor.extract" },
+              diagnostics = {},
+            },
+          })
+        end,
+        desc = "Extract (Method/Variable)",
+        mode = { "n", "v" },
+      },
+      {
+        "<leader>ri",
+        function()
+          vim.lsp.buf.code_action({
+            context = {
+              only = { "refactor.inline" },
+              diagnostics = {},
+            },
+          })
+        end,
+        desc = "Inline Variable/Method",
+      },
+      {
+        "<leader>rr",
+        function()
+          vim.lsp.buf.code_action({
+            context = {
+              only = { "refactor.rewrite" },
+              diagnostics = {},
+            },
+          })
+        end,
+        desc = "Rewrite/Restructure Code",
+        mode = { "n", "v" },
+      },
+      -- Quick fixes rápidos
+      {
+        "<leader>qf",
+        function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = {
+              only = { "quickfix" },
+              diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 }),
+            },
+          })
+        end,
+        desc = "Quick Fix",
+      },
+      -- Organizar imports/usings
+      {
+        "<leader>co",
+        function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = {
+              only = { "source.organizeImports" },
+              diagnostics = {},
+            },
+          })
+        end,
+        desc = "Organize Imports",
+      },
+      -- Remove unused usings
+      {
+        "<leader>cu",
+        function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = {
+              only = { "source.removeUnusedImports" },
+              diagnostics = {},
+            },
+          })
+        end,
+        desc = "Remove Unused Imports",
+      },
+    },
   },
 
   -- Comandos personalizados para refactorings

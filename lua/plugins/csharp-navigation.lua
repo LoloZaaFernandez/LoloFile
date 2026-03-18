@@ -149,8 +149,8 @@ return {
         group = vim.api.nvim_create_augroup("csharp_navigation", { clear = true }),
         callback = function(ev)
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
-          -- Funciona con csharp_ls u omnisharp
-          if client and (client.name == "csharp_ls" or client.name == "omnisharp") then
+          -- Funciona con OmniSharp (servidor principal C#)
+          if client and client.name == "omnisharp" then
             -- Activar inlay hints automáticamente para C#
             if client.server_capabilities.inlayHintProvider then
               vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })

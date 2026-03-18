@@ -4,15 +4,11 @@
 local keymap = vim.keymap
 local opts = { noremap = true, silent = true }
 
---increment/decrement
-keymap.set("n", "+", "<C-a>")
-keymap.set("n", "-", "<C-x>")
-
 ---Delete a word backward
 keymap.set("n", "dw", "vb_d")
 
 --select all
-keymap.set("n", "<C-a>", "gg<S-v>G")
+keymap.set("n", "<leader>sa", "gg<S-v>G", { desc = "Select All" })
 
 --Jumplist
 keymap.set("n", "te", "tabedit", opts)

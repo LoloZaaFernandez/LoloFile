@@ -119,9 +119,6 @@ vim.diagnostic.config({
   severity_sort = true,
 })
 
--- 9. Optimizar LSP debounce para proyectos grandes
-vim.opt.updatetime = 300 -- Aumentar de 200 a 300ms para proyectos grandes
-
 -- 10. Optimizar swap y backup para SSDs
 vim.opt.swapfile = false -- Deshabilitar swap en SSDs modernos
 vim.opt.backup = false -- No crear backups temporales
@@ -189,5 +186,3 @@ vim.opt.sidescrolloff = 8
 --   end,
 -- })
 
--- Mensaje de confirmación
-vim.notify("Optimizaciones de rendimiento cargadas para proyectos grandes", vim.log.levels.INFO)

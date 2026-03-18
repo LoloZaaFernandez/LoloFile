@@ -37,11 +37,6 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" }, -- Cargar solo al abrir archivos, no en startup
     opts = {
-      -- Retrasar diagnósticos para mejor rendimiento
-      diagnostics = {
-        update_in_insert = false,
-        debounce = 300, -- Esperar 300ms antes de mostrar diagnósticos
-      },
       -- Opciones globales de LSP
       inlay_hints = { enabled = true }, -- Activar inlay hints (moderno)
       codelens = { enabled = false },
@@ -50,6 +45,7 @@ return {
       diagnostics = {
         underline = true,
         update_in_insert = false,
+        debounce = 300, -- Esperar 300ms antes de mostrar diagnósticos
         virtual_text = {
           spacing = 4,
           source = "if_many",
@@ -122,9 +118,9 @@ return {
             },
           },
         },
-        -- csharp_ls: Servidor C# ligero y rápido (principal)
-        csharp_ls = {
-          -- Configuración optimizada para proyectos grandes
+        -- OmniSharp: Servidor principal C# con Roslyn completo (.NET 8)
+        omnisharp = {
+          cmd = { "C:/Users/Arnold/AppData/Local/nvim-data/mason/packages/omnisharp/libexec/OmniSharp.exe" },
           filetypes = { "cs" },
           root_dir = function(fname)
             local util = require("lspconfig.util")
@@ -133,48 +129,14 @@ return {
               or util.root_pattern("*.csproj")(fname)
               or util.find_git_ancestor(fname)
           end,
-          handlers = {
-            ["textDocument/definition"] = function(...)
-              return vim.lsp.handlers["textDocument/definition"](...)
-            end,
-          },
-          on_attach = function(client, bufnr)
-            -- Habilitar inlay hints si está disponible
-            if client.server_capabilities.inlayHintProvider then
-              vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-            end
-          end,
-        },
-        -- OmniSharp: Backup optimizado (si csharp_ls no funciona bien)
-        omnisharp = {
-          cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
-          -- Optimización máxima para proyectos 30+
-          enable_ms_build_load_projects_on_demand = true,
-          enable_editorconfig_support = false, -- Desactivar para velocidad
+          -- Roslyn moderno — features completos para .NET 8
+          enable_roslyn_analyzers = true,
           enable_import_completion = true,
-          organize_imports_on_format = false,
-          enable_roslyn_analyzers = false, -- Desactivar analizadores pesados
-          sdk_include_prereleases = true,
-          analyze_open_documents_only = true, -- CRÍTICO para proyectos grandes
-          use_modern_net = true,
-          filetypes = { "cs" },
-          root_dir = function(fname)
-            local util = require("lspconfig.util")
-            return util.root_pattern("*.sln")(fname)
-              or util.root_pattern("*.csproj")(fname)
-              or util.find_git_ancestor(fname)
-          end,
+          organize_imports_on_format = true,
+          enable_editorconfig_support = true,
+          analyze_open_documents_only = false,
+          sdk_include_prereleases = false,
           on_attach = function(client, bufnr)
-            -- Deshabilitar omnisharp si csharp_ls ya está activo
-            local clients = vim.lsp.get_clients({ bufnr = bufnr })
-            for _, c in ipairs(clients) do
-              if c.name == "csharp_ls" and c.id ~= client.id then
-                vim.notify("csharp_ls ya activo, deteniendo omnisharp", vim.log.levels.INFO)
-                vim.lsp.stop_client(client.id)
-                return
-              end
-            end
-
             -- Habilitar inlay hints
             if client.server_capabilities.inlayHintProvider then
               vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
@@ -241,11 +203,8 @@ return {
         },
       },
       setup = {
-        csharp_ls = function(_, opts)
-          -- csharp_ls es un servidor ligero, no necesita configuración especial
-        end,
         omnisharp = function(_, opts)
-          -- OmniSharp backup con configuración optimizada ya definida arriba
+          -- OmniSharp Roslyn v1.39.14 — servidor principal C#
         end,
       },
     },
