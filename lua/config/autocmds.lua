@@ -77,18 +77,3 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end
   end,
 })
-
--- Habilitar inlay hints automáticamente para C# cuando LSP se adjunta
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    local bufnr = args.buf
-
-    -- Si es C# (omnisharp), habilitar inlay hints inmediatamente
-    if client and client.name == "omnisharp" then
-      if client.server_capabilities.inlayHintProvider then
-        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-      end
-    end
-  end,
-})

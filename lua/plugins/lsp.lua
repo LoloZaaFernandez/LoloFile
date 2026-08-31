@@ -18,14 +18,12 @@ return {
         "prettier",
         -- Python
         "pyright",
+        "ruff",
         "black",
         "isort",
         "flake8",
-        -- C# (csharp-language-server es más ligero para proyectos grandes)
-        "csharp-language-server",
-        "omnisharp", -- Backup por si csharp-language-server no funciona bien
-        "csharpier",
-        "netcoredbg",
+        -- Node/JS debugging
+        "js-debug-adapter",
         -- Rust
         "rust-analyzer",
         "rustfmt",
@@ -45,7 +43,10 @@ return {
       diagnostics = {
         underline = true,
         update_in_insert = false,
-        debounce = 300, -- Esperar 300ms antes de mostrar diagnósticos
+        -- NOTA: `debounce` NO es un campo válido de vim.diagnostic.Opts (no existe en el schema
+        -- de vim.diagnostic.config()). Si quedaba acá era para "esperar 300ms antes de mostrar
+        -- diagnósticos", pero eso se logra con `flags = { debounce_text_changes = 300 }` dentro
+        -- de la config de cada server LSP (servers.<nombre>.flags), NO dentro de esta tabla.
         virtual_text = {
           spacing = 4,
           source = "if_many",
@@ -118,31 +119,7 @@ return {
             },
           },
         },
-        -- OmniSharp: Servidor principal C# con Roslyn completo (.NET 8)
-        omnisharp = {
-          cmd = { "C:/Users/Arnold/AppData/Local/nvim-data/mason/packages/omnisharp/libexec/OmniSharp.exe" },
-          filetypes = { "cs" },
-          root_dir = function(fname)
-            local util = require("lspconfig.util")
-            -- Buscar .sln primero para proyectos multi-proyecto
-            return util.root_pattern("*.sln")(fname)
-              or util.root_pattern("*.csproj")(fname)
-              or util.find_git_ancestor(fname)
-          end,
-          -- Roslyn moderno — features completos para .NET 8
-          enable_roslyn_analyzers = true,
-          enable_import_completion = true,
-          organize_imports_on_format = true,
-          enable_editorconfig_support = true,
-          analyze_open_documents_only = false,
-          sdk_include_prereleases = false,
-          on_attach = function(client, bufnr)
-            -- Habilitar inlay hints
-            if client.server_capabilities.inlayHintProvider then
-              vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-            end
-          end,
-        },
+        ruff = {},
         lua_ls = {
           single_file_support = true,
           settings = {
@@ -201,11 +178,6 @@ return {
             },
           },
         },
-      },
-      setup = {
-        omnisharp = function(_, opts)
-          -- OmniSharp Roslyn v1.39.14 — servidor principal C#
-        end,
       },
     },
     keys = {

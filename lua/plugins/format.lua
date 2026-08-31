@@ -4,8 +4,6 @@ return {
     optional = true,
     opts = {
       formatters_by_ft = {
-        -- C#
-        cs = { "csharpier" },
         -- Web
         typescript = { "prettier" },
         typescriptreact = { "prettier" },
@@ -19,7 +17,7 @@ return {
         yaml = { "prettier" },
         markdown = { "prettier" },
         -- Python
-        python = { "black", "isort" },
+        python = { "ruff_organize_imports", "ruff_fix", "ruff_format" },
         -- Rust
         rust = { "rustfmt" },
         -- Lua

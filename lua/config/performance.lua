@@ -84,24 +84,6 @@ vim.api.nvim_create_autocmd("BufHidden", {
   end,
 })
 
--- 8. Optimizaciones para proyectos .NET muy grandes (30+ proyectos)
--- Limitar memoria de LSP
-vim.g.lsp_max_memory = 4096 -- MB
-
--- Desactivar diagnósticos en archivos muy grandes
-vim.api.nvim_create_autocmd("BufReadPost", {
-  group = aug,
-  pattern = "*.cs",
-  callback = function(ev)
-    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(ev.buf))
-    if ok and stats and stats.size > 500000 then -- 500KB
-      -- Archivo C# muy grande, reducir features
-      vim.diagnostic.disable(ev.buf)
-      vim.notify("Diagnósticos desactivados para archivo grande: " .. vim.fn.expand("%:t"), vim.log.levels.INFO)
-    end
-  end,
-})
-
 -- Limitar número de diagnósticos mostrados simultáneamente
 vim.diagnostic.config({
   virtual_text = {
@@ -124,19 +106,6 @@ vim.opt.swapfile = false -- Deshabilitar swap en SSDs modernos
 vim.opt.backup = false -- No crear backups temporales
 vim.opt.writebackup = false -- No crear backup antes de escribir
 
--- 11. Mejorar rendimiento de treesitter en archivos C# grandes
-vim.api.nvim_create_autocmd("FileType", {
-  group = aug,
-  pattern = "cs",
-  callback = function()
-    -- Limitar highlighting para archivos C# muy grandes
-    if vim.fn.line("$") > 5000 then
-      vim.treesitter.stop() -- Deshabilitar treesitter en archivos > 5000 líneas
-      vim.notify("Treesitter desactivado para archivo grande", vim.log.levels.INFO)
-    end
-  end,
-})
-
 -- 12. Reducir historial para ahorrar memoria
 vim.opt.history = 1000 -- Reducir de default (10000)
 
@@ -153,8 +122,7 @@ vim.opt.wildignore:append({
   "*.cache",
 })
 
--- 14. Configurar timeoutlen para mejor experiencia
-vim.opt.timeoutlen = 300 -- Reducir timeout para teclas (mejor UX)
+-- 14. Configurar ttimeoutlen para mejor experiencia
 vim.opt.ttimeoutlen = 10 -- Timeout más rápido para escape
 
 -- 15. Desactivar matchparen en archivos muy grandes
@@ -167,14 +135,10 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
--- 16. Limitar ancho de mensajes
-vim.opt.cmdheight = 0 -- Ocultar cmdline cuando no se usa (más espacio)
-
 -- 17. Optimizar redrawtime
 vim.opt.redrawtime = 1500 -- Reducir tiempo máximo de redraw
 
--- 18. Configurar scrolloff para mejor experiencia
-vim.opt.scrolloff = 8 -- Mantener 8 líneas visibles arriba/abajo del cursor
+-- 18. Configurar sidescrolloff para mejor experiencia
 vim.opt.sidescrolloff = 8
 
 -- 19. Monitoreo de rendimiento (opcional, comentar en producción)

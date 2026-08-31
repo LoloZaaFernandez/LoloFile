@@ -1,4 +1,5 @@
--- Debugging avanzado para .NET Core con UI mejorada
+-- Debugging genérico (UI, virtual text y keymaps) para cualquier lenguaje con nvim-dap
+-- Los adapters específicos de cada lenguaje viven en debug-python.lua y debug-node.lua
 return {
   {
     "mfussenegger/nvim-dap",
@@ -245,79 +246,6 @@ return {
     },
     config = function()
       local dap = require("dap")
-
-      -- Configuración del adapter para .NET Core
-      dap.adapters.coreclr = {
-        type = "executable",
-        command = "netcoredbg",
-        args = { "--interpreter=vscode" },
-      }
-
-      -- Función auxiliar para encontrar DLL automáticamente
-      local function find_dll()
-        local cwd = vim.fn.getcwd()
-        -- Buscar en bin/Debug/net*.0/*.dll
-        local patterns = {
-          "/bin/Debug/net8.0/*.dll",
-          "/bin/Debug/net7.0/*.dll",
-          "/bin/Debug/net6.0/*.dll",
-          "/bin/Release/net8.0/*.dll",
-          "/bin/Release/net7.0/*.dll",
-          "/bin/Release/net6.0/*.dll",
-        }
-
-        for _, pattern in ipairs(patterns) do
-          local files = vim.fn.glob(cwd .. pattern, false, true)
-          if #files > 0 then
-            -- Retornar el primero que no sea deps.dll o runtimeconfig.json
-            for _, file in ipairs(files) do
-              if not file:match("deps%.dll$") and not file:match("%.pdb$") then
-                return file
-              end
-            end
-          end
-        end
-
-        -- Si no encuentra, preguntar al usuario
-        return vim.fn.input("Path to dll: ", cwd .. "/bin/Debug/net8.0/", "file")
-      end
-
-      -- Configuraciones de debugging para C#
-      dap.configurations.cs = {
-        {
-          type = "coreclr",
-          name = "Launch .NET (Auto-detect DLL)",
-          request = "launch",
-          program = find_dll,
-        },
-        {
-          type = "coreclr",
-          name = "Launch .NET (Manual DLL)",
-          request = "launch",
-          program = function()
-            return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/bin/Debug/net8.0/", "file")
-          end,
-        },
-        {
-          type = "coreclr",
-          name = "Attach to Process",
-          request = "attach",
-          processId = function()
-            return require("dap.utils").pick_process()
-          end,
-        },
-        {
-          type = "coreclr",
-          name = "Launch ASP.NET Core",
-          request = "launch",
-          program = find_dll,
-          env = {
-            ASPNETCORE_ENVIRONMENT = "Development",
-            ASPNETCORE_URLS = "http://localhost:5000",
-          },
-          cwd = "${workspaceFolder}",
-        },
-      }
 
       -- Iconos para signos de debugging
       vim.fn.sign_define("DapBreakpoint", {

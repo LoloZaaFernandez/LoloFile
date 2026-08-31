@@ -1,6 +1,6 @@
 # LoloVim
 
-Configuración personal de Neovim basada en **LazyVim v8**, orientada a desarrollo **.NET Core / C#** en Windows con soporte para TypeScript, Python y Rust.
+Configuración personal de Neovim basada en **LazyVim v8**, orientada a desarrollo web (Node.js, React, Next.js) y Python en Windows, con soporte para Rust.
 
 ## Stack
 
@@ -11,8 +11,9 @@ Configuración personal de Neovim basada en **LazyVim v8**, orientada a desarrol
 | Completion | blink.cmp |
 | Picker | telescope.nvim + fzf-native |
 | Formatter | conform.nvim |
-| LSP principal C# | OmniSharp Roslyn v1.39.14 |
-| Debug .NET | netcoredbg via nvim-dap |
+| Debug | nvim-dap + nvim-dap-python (Python) + nvim-dap-vscode-js (Node/JS/TS) |
+| Testing | neotest (neotest-python + neotest-vitest) |
+| Tasks | overseer.nvim + package-info.nvim |
 | AI | GitHub Copilot + Claude Code CLI |
 
 ## Requisitos
@@ -31,21 +32,14 @@ Versión mínima: **0.10+**
 |---|---|---|
 | `git` | lazy.nvim y plugins | `winget install Git.Git` |
 | `node` + `npm` | LSPs de JS/TS, Copilot | `winget install OpenJS.NodeJS` |
-| `python 3` | pyright, black, isort | `winget install Python.Python.3` |
+| `python 3` | pyright, ruff, debugpy | `winget install Python.Python.3` |
 | `ripgrep` | telescope live grep | `winget install BurntSushi.ripgrep.MSVC` |
 | `cmake` | telescope-fzf-native | `winget install Kitware.CMake` |
 | `gcc` o `clang` | compilar fzf-native | `winget install MSYS2.MSYS2` (luego `pacman -S mingw-w64-x86_64-gcc`) |
 
 > En macOS/Linux reemplazá `winget` por `brew` o el package manager de tu distro.
 
-### 3. .NET SDK 8
-
-Requerido para OmniSharp y netcoredbg.
-
-- Windows: `winget install Microsoft.DotNet.SDK.8`
-- macOS/Linux: ver [dot.net](https://dot.net)
-
-### 4. Nerd Font
+### 3. Nerd Font
 
 La config usa íconos de Nerd Fonts. Sin la fuente instalada vas a ver cuadritos.
 
@@ -54,14 +48,14 @@ Recomendada: **JetBrainsMono Nerd Font**
 - Descargar: [nerdfonts.com](https://www.nerdfonts.com/font-downloads)
 - Configurarla en tu terminal (Windows Terminal, iTerm2, Alacritty, etc.)
 
-### 5. Shell
+### 4. Shell
 
 | Plataforma | Shell requerido |
 |---|---|
 | Windows | PowerShell (`pwsh`) — `winget install Microsoft.PowerShell` |
 | macOS/Linux | `fish` — [fishshell.com](https://fishshell.com) |
 
-### 6. Claude Code CLI (opcional)
+### 5. Claude Code CLI (opcional)
 
 Para el panel de Claude integrado en Neovim.
 
@@ -127,31 +121,7 @@ nvim
 | `gy` | Go to Type Definition |
 | `<C-j>` | Next Diagnostic |
 
-### C# — Navegación
-
-| Keymap | Acción |
-|---|---|
-| `<leader>nC` | Find Controllers |
-| `<leader>nS` | Find Services |
-| `<leader>nR` | Find Repositories |
-| `<leader>nD` | Find DTOs/Models |
-| `<leader>nI` | Find Interfaces |
-| `<leader>ni` | Smart Navigation (Controller→Service→Repo) |
-
-### C# — Refactoring
-
-| Keymap | Acción |
-|---|---|
-| `<leader>rn` | Rename con preview |
-| `<leader>ca` / `<leader>cA` | Code Action / Source Action |
-| `<leader>re` | Extract Method/Variable |
-| `<leader>ri` | Inline Variable/Method |
-| `<leader>rr` | Rewrite/Restructure |
-| `<leader>qf` | Quick Fix |
-| `<leader>co` | Organize Imports |
-| `<leader>cu` | Remove Unused Imports |
-
-### Debug (.NET — estilo Visual Studio)
+### Debug (Python / Node — estilo Visual Studio)
 
 | Keymap | Acción |
 |---|---|
@@ -162,6 +132,23 @@ nvim
 | `<S-F11>` | Step Out |
 | `<leader>du` | Toggle DAP UI |
 | `<leader>de` | Eval Expression |
+| `<leader>dpr` | Python: Run Test Method |
+| `<leader>dpc` | Python: Run Test Class |
+
+### Testing (neotest)
+
+| Keymap | Acción |
+|---|---|
+| `<leader>tr` | Run Nearest Test |
+| `<leader>tf` | Run Test File |
+| `<leader>ts` | Toggle Summary |
+
+### Tasks (overseer.nvim)
+
+| Keymap | Acción |
+|---|---|
+| `<leader>oo` | Toggle Task List |
+| `<leader>or` | Run Task |
 
 ### Claude Code
 
@@ -177,13 +164,12 @@ nvim
 
 | Lenguaje | Servidor |
 |---|---|
-| C# / .NET | OmniSharp Roslyn |
 | TypeScript / JS | ts_ls |
 | CSS | cssls |
 | Tailwind | tailwindcss |
 | HTML | html |
 | YAML | yamlls |
-| Python | pyright |
+| Python | pyright + ruff |
 | Lua | lua_ls |
 | Rust | rust-analyzer |
 
@@ -209,9 +195,11 @@ nvim/
         ├── ui.lua              # UI: noice, bufferline, lualine
         ├── format.lua          # conform.nvim
         ├── treesitter.lua      # Treesitter
-        ├── debug.lua           # DAP para .NET
+        ├── debug.lua           # DAP UI + virtual-text + keymaps (genérico)
+        ├── debug-python.lua    # nvim-dap-python (debugpy)
+        ├── debug-node.lua      # nvim-dap-vscode-js (pwa-node)
+        ├── testing.lua         # neotest (Python + Vitest)
+        ├── tasks.lua           # overseer.nvim + package-info.nvim
         ├── colorscheme.lua     # solarized-osaka
-        ├── claude-code.lua     # Panel Claude CLI
-        ├── csharp-navigation.lua  # Navegación C# por capas
-        └── csharp-refactor.lua    # Refactoring Roslyn
+        └── claude-code.lua     # Panel Claude CLI
 ```

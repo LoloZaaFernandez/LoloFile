@@ -16,7 +16,6 @@ return {
     opts = {
       -- Solo instalar parsers esenciales, el resto bajo demanda
       ensure_installed = {
-        "c_sharp", -- Crítico para C#
         "lua", -- Para configuración
         "vim",
         "vimdoc",
